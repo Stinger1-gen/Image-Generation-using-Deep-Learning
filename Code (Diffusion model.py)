@@ -1,0 +1,32 @@
+from diffusers import StableDiffusionPipeline
+import torch
+import matplotlib.pyplot as plt
+
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16  
+)
+pipe = pipe.to("cuda" if torch.cuda.is_available() else "cpu")
+
+
+prompts = [
+    "a futuristic city with flying cars, ultra-detailed, 4K", 
+    "a fantasy landscape with dragons and castles, vivid colors",
+    "A formula 1 car racing on a track, high speed, dynamic angle",
+]
+
+
+images = []
+for prompt in prompts:
+    image = pipe(prompt).images[0]
+    images.append(image)
+
+
+fig, axes = plt.subplots(1, len(prompts), figsize=(6 * len(prompts), 6))
+for ax, img, prompt in zip(axes, images, prompts):
+    ax.imshow(img)
+    ax.set_title(prompt[:40] + '...' if len(prompt) > 40 else prompt, fontsize=10)
+    ax.axis("off")
+plt.tight_layout()
+plt.show()
